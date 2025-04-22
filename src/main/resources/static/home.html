@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GameVerse - Home</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #222;
+      color: white;
+      padding: 1rem 2rem;
+    }
+
+    .navbar h1 {
+      margin: 0;
+    }
+
+    .navbar .links a {
+      color: white;
+      margin-left: 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .game-card:hover {
+      transform: scale(1.03);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .game-card .details {
+      padding: 1rem;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      display: none;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <h1>GameVerse</h1>
+  <div class="links">
+    <a href="/profile.html">Profile</a>
+    <a href="/admin.html" id="adminLink" style="display: none;">Admin</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid" id="gameGrid">
+    <!-- Games will be inserted here -->
+  </div>
+</div>
+
+<div class="modal" id="gameModal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDesc"></p>
+  </div>
+</div>
+
+<script>
+  // Mock: Replace with actual auth check to show admin link
+  const userRole = "ROLE_ADMIN"; // Assume this is set after login
+  if (userRole === "ROLE_ADMIN") {
+    document.getElementById("adminLink").style.display = "inline";
+  }
+
+  function openModal(title, description) {
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalDesc").innerText = description;
+    document.getElementById("gameModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("gameModal").style.display = "none";
+  }
+
+  async function loadGames() {
+    const res = await fetch("/api/games");
+    const games = await res.json();
+    const grid = document.getElementById("gameGrid");
+
+    games.forEach(game => {
+      const card = document.createElement("div");
+      card.className = "game-card";
+      card.innerHTML = `
+          <img src="${game.imageUrl || 'https://placehold.co/600x400'}" alt="${game.title}">
+          <div class="details">
+            <h3>${game.title}</h3>
+            <p>${game.genre}</p>
+            <p>$${game.price}</p>
+          </div>
+        `;
+      card.onclick = () => openModal(game.title, game.description || "No description available.");
+      grid.appendChild(card);
+    });
+  }
+
+  window.onload = loadGames;
+</script>
+</body>
+</html>
