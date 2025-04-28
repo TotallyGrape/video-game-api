@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game News - Game Reviews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">Reviews</div><nav>
+    <nav>
+        <ul>
+            <li><a href="home.html" id="home-link">Home</a></li>
+            <li><a href="top.html" id="top-link">Top Reviews</a></li>
+            <li><a href="news.html" id="news-link">News</a></li>
+            <li><a href="search.html" id="search-link">Search</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li id="admin-li" style="display: none;"><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        // Check user role and show Admin link if needed
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const user = await res.json();
+
+                if (user.roles && user.roles.includes('ROLE_ADMIN')) {
+                    document.getElementById('admin-link').style.display = 'inline';
+                }
+            } catch (error) {
+                console.error('User not logged in or fetch error', error);
+            }
+        });
+    </script>
+
+</header>
+
+<main>
+    <h1 class="page-title">Latest Gaming News</h1>
+
+    <article class="news-article">
+        <img src="https://via.placeholder.com/850x300/4CAF50/FFFFFF?text=Major+Game+Update" alt="Game Update Banner" class="article-image">
+        <h2><a href="#">Major Update Announced for 'Cybernetic Horizons'</a></h2>
+        <div class="article-meta">
+            <span>By Jane Doe</span> |
+            <span>Published on: April 15, 2025</span>
+        </div>
+        <p class="article-excerpt">
+            Developers Inc. revealed the 'Expansion Protocol' update for Cybernetic Horizons. New playable areas and revamped combat incoming!
+        </p>
+        <a href="#" class="read-more-link">Read More »</a>
+    </article>
+
+    <article class="news-article">
+        <img src="https://via.placeholder.com/200x120/FF9800/000000?text=Indie+Gem" alt="Indie Game Screenshot" class="article-thumbnail">
+        <h2><a href="#">Indie Darling 'Pixel Pioneers' Surpasses 1 Million Sales</a></h2>
+        <div class="article-meta">
+            <span>By John Smith</span> |
+            <span>Published on: April 14, 2025</span>
+        </div>
+        <p class="article-excerpt">
+            Pixel Pioneers, developed by a two-person team, hits 1 million sales across all platforms.
+        </p>
+        <a href="#" class="read-more-link">Read More »</a>
+    </article>
+
+    <article class="news-article">
+        <h2><a href="#">Esports Championship Finals Set for Next Weekend</a></h2>
+        <div class="article-meta">
+            <span>By Alex Johnson</span> |
+            <span>Published on: April 12, 2025</span>
+        </div>
+        <p class="article-excerpt">
+            Global Gaming League finals are set! Top teams will clash for the title and massive prize pools.
+        </p>
+        <a href="#" class="read-more-link">Read More »</a>
+    </article>
+
+    <article class="news-article">
+        <img src="https://via.placeholder.com/850x300/2196F3/FFFFFF?text=New+Console+Rumors" alt="Console Mockup" class="article-image">
+        <h2><a href="#">Rumors Swirl About Next-Generation Console Specs</a></h2>
+        <div class="article-meta">
+            <span>By Staff Writer</span> |
+            <span>Published on: April 10, 2025</span>
+        </div>
+        <p class="article-excerpt">
+            Insiders hint at major performance boosts for upcoming console generations. Leaked documents suggest wild features incoming.
+        </p>
+        <a href="#" class="read-more-link">Read More »</a>
+    </article>
+
+</main>
+
+<footer>
+    <p>© 2025 Game Reviews. All rights reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+</footer>
+
+</body>
+</html>

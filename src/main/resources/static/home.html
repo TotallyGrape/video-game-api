@@ -1,159 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>GameVerse - Home</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #222;
-      color: white;
-      padding: 1rem 2rem;
-    }
-
-    .navbar h1 {
-      margin: 0;
-    }
-
-    .navbar .links a {
-      color: white;
-      margin-left: 1rem;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .container {
-      padding: 2rem;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 2rem;
-      overflow-y: auto;
-      max-height: 80vh;
-    }
-
-    .game-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .game-card:hover {
-      transform: scale(1.03);
-    }
-
-    .game-card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-    }
-
-    .game-card .details {
-      padding: 1rem;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      display: none;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 500px;
-    }
-
-    .close-btn {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Reviews</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="navbar">
-  <h1>GameVerse</h1>
-  <div class="links">
-    <a href="/profile.html">Profile</a>
-    <a href="/admin.html" id="adminLink" style="display: none;">Admin</a>
-  </div>
-</div>
 
-<div class="container">
-  <div class="grid" id="gameGrid">
-    <!-- Games will be inserted here -->
-  </div>
-</div>
+<header>
+    <div class="logo">Reviews</div>
+    <nav>
+        <ul>
+            <li><a href="home.html" id="home-link">Home</a></li>
+            <li><a href="top.html" id="top-link">Top Reviews</a></li>
+            <li><a href="news.html" id="news-link">News</a></li>
+            <li><a href="search.html" id="search-link">Search</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li id="admin-li" style="display: none;"><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
 
-<div class="modal" id="gameModal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeModal()">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <p id="modalDesc"></p>
-  </div>
-</div>
+    <script>
+        // Check user role and show Admin link if needed
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const user = await res.json();
+
+                if (user.roles && user.roles.includes('ROLE_ADMIN')) {
+                    document.getElementById('admin-link').style.display = 'inline';
+                }
+            } catch (error) {
+                console.error('User not logged in or fetch error', error);
+            }
+        });
+    </script>
+
+</header>
+
+<main>
+    <section class="featured">
+        <h1>New and Notable Games</h1>
+        <div class="game-grid" id="game-grid"></div>
+    </section>
+</main>
+
+<footer>
+    <p>© 2025 Game Reviews. All rights reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+</footer>
 
 <script>
-  // Mock: Replace with actual auth check to show admin link
-  const userRole = "ROLE_ADMIN"; // Assume this is set after login
-  if (userRole === "ROLE_ADMIN") {
-    document.getElementById("adminLink").style.display = "inline";
-  }
+    let isAdmin = false;
 
-  function openModal(title, description) {
-    document.getElementById("modalTitle").innerText = title;
-    document.getElementById("modalDesc").innerText = description;
-    document.getElementById("gameModal").style.display = "flex";
-  }
+    // Check if user is admin
+    async function checkAdmin() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const user = await res.json();
+            console.log('Admin check:', user.role); // now check singular role
+            if (user.role === 'ROLE_ADMIN') {
+                isAdmin = true;
+            }
+        } catch (error) {
+            console.error('Error checking admin role', error);
+        }
+    }
 
-  function closeModal() {
-    document.getElementById("gameModal").style.display = "none";
-  }
 
-  async function loadGames() {
-    const res = await fetch("/api/games");
-    const games = await res.json();
-    const grid = document.getElementById("gameGrid");
+    // Load games and show delete button if admin
+    async function loadGames() {
+        try {
+            await checkAdmin(); // check admin first
 
-    games.forEach(game => {
-      const card = document.createElement("div");
-      card.className = "game-card";
-      card.innerHTML = `
-          <img src="${game.imageUrl || 'https://placehold.co/600x400'}" alt="${game.title}">
-          <div class="details">
-            <h3>${game.title}</h3>
-            <p>${game.genre}</p>
-            <p>$${game.price}</p>
-          </div>
-        `;
-      card.onclick = () => openModal(game.title, game.description || "No description available.");
-      grid.appendChild(card);
-    });
-  }
+            const response = await fetch('/api/games');
+            const games = await response.json();
 
-  window.onload = loadGames;
+            const gameGrid = document.getElementById('game-grid');
+            gameGrid.innerHTML = '';
+
+            games.forEach(game => {
+                const gameItem = document.createElement('div');
+                gameItem.classList.add('game-item');
+                gameItem.dataset.id = game.id;
+
+                gameItem.innerHTML = `
+                <img src="${game.imageUrl}" alt="${game.title}" style="width:100%; height:150px; object-fit:cover; border-radius:5px; margin-bottom:10px;">
+                <h2>${game.title}</h2>
+                <p class="metascore-info">Genre: ${game.genre}</p>
+                <p class="metascore-info">Price: $${game.price}</p>
+                <p class="metascore-info">Developer: ${game.developer}</p>
+                ${isAdmin ? `<button onclick="deleteGame('${game.id}')">Delete</button>` : ''}
+            `;
+
+                gameItem.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'BUTTON') {
+                        window.location.href = `game.html?id=${game.id}`;
+                    }
+                });
+
+                gameGrid.appendChild(gameItem);
+            });
+
+        } catch (error) {
+            console.error('Failed to load games:', error);
+        }
+    }
+
+    // Delete a game
+    async function deleteGame(gameId) {
+        if (!confirm('Are you sure you want to delete this game?')) return;
+
+        try {
+            const response = await fetch(`/api/games/${gameId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Game deleted!');
+                loadGames(); // reload games after delete
+            } else {
+                alert('Failed to delete game.');
+            }
+        } catch (error) {
+            console.error('Error deleting game', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadGames);
 </script>
+
+
+
 </body>
 </html>

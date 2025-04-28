@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Top Game Reviews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">Top Reviews</div>
+    <nav>
+        <ul>
+            <li><a href="home.html" class="active">Home</a></li>
+            <li><a href="top.html">Top Reviews</a></li>
+            <li><a href="news.html">News</a></li>
+            <li><a href="search.html">Search</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        // Check user role and show Admin link if needed
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const user = await res.json();
+
+                if (user.roles && user.roles.includes('ROLE_ADMIN')) {
+                    document.getElementById('admin-link').style.display = 'inline';
+                }
+            } catch (error) {
+                console.error('User not logged in or fetch error', error);
+            }
+        });
+    </script>
+
+</header>
+
+<main>
+    <section class="top-reviews">
+        <h1>Top Game Reviews</h1>
+
+        <div class="review-item" onclick="viewGameDetails('EldenRing')">
+            <img src="https://example.com/elden-ring-image.jpg" alt="Elden Ring">
+            <h2>Elden Ring</h2>
+            <p class="metascore-info">Metascore: <span class="score">95</span></p>
+            <p class="description">Expansive world and engaging gameplay from FromSoftware's newest epic.</p>
+        </div>
+
+        <div class="review-item" onclick="viewGameDetails('GodOfWarRagnarok')">
+            <img src="https://example.com/god-of-war-ragnarok-image.jpg" alt="God of War Ragnarök">
+            <h2>God of War Ragnarök</h2>
+            <p class="metascore-info">Metascore: <span class="score">94</span></p>
+            <p class="description">The Norse saga continues with emotional storytelling and brutal combat.</p>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>© 2025 Game Reviews. All rights reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+</footer>
+
+<script>
+    function viewGameDetails(gameTitle) {
+        alert(`Navigating to details for: ${gameTitle}`);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Games - Game Reviews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">Reviews</div>
+    <nav>
+        <ul>
+            <li><a href="home.html" class="active">Home</a></li>
+            <li><a href="top.html">Top Reviews</a></li>
+            <li><a href="news.html">News</a></li>
+            <li><a href="search.html">Search</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        // Check user role and show Admin link if needed
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const user = await res.json();
+
+                if (user.roles && user.roles.includes('ROLE_ADMIN')) {
+                    document.getElementById('admin-link').style.display = 'inline';
+                }
+            } catch (error) {
+                console.error('User not logged in or fetch error', error);
+            }
+        });
+    </script>
+
+</header>
+
+<main>
+    <h1 class="page-title">Search Games</h1>
+
+    <form class="search-form" id="game-search-form" onsubmit="handleSearch(event)">
+        <input type="search" id="search-input" placeholder="Enter game title, genre, platform..." required>
+        <button type="submit">Search</button>
+    </form>
+
+    <section id="search-results">
+        <div class="search-results-placeholder" id="results-placeholder">
+            Enter a search term above to find games.
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>© 2025 Game Reviews. All rights reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+</footer>
+
+<script>
+    function handleSearch(event) {
+        event.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('search-results');
+        const placeholder = document.getElementById('results-placeholder');
+        const query = searchInput.value.trim().toLowerCase();
+
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(placeholder);
+
+        if (!query) {
+            placeholder.textContent = 'Please enter a search term.';
+            return;
+        }
+
+        placeholder.textContent = 'Searching...';
+
+        setTimeout(() => {
+            const dummyResults = [
+                { title: 'Cybernetic Horizons', platform: 'PC, PS5', genre: 'Sci-Fi RPG' },
+                { title: 'Pixel Pioneers', platform: 'PC, Switch', genre: 'Adventure' },
+                { title: 'Arena Masters', platform: 'PC', genre: 'MOBA' }
+            ];
+
+            const filtered = dummyResults.filter(game => game.title.toLowerCase().includes(query));
+
+            if (filtered.length > 0) {
+                placeholder.style.display = 'none';
+                filtered.forEach(game => {
+                    const result = document.createElement('div');
+                    result.className = 'search-result-item';
+                    result.innerHTML = `
+                        <img src="https://via.placeholder.com/60x80?text=Game" alt="${game.title}">
+                        <div class="search-result-details">
+                            <h3><a href="#">${game.title}</a></h3>
+                            <p>Platform: ${game.platform} | Genre: ${game.genre}</p>
+                        </div>
+                    `;
+                    resultsContainer.appendChild(result);
+                });
+            } else {
+                placeholder.textContent = `No results found for \"${searchInput.value}\".`;
+            }
+        }, 800);
+    }
+</script>
+
+</body>
+</html>

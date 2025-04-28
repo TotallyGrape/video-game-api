@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">Admin Panel</div>
+    <nav>
+        <ul>
+            <li><a href="home.html" id="home-link">Home</a></li>
+            <li><a href="top.html" id="top-link">Top Reviews</a></li>
+            <li><a href="news.html" id="news-link">News</a></li>
+            <li><a href="search.html" id="search-link">Search</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li id="admin-li" style="display: none;"><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <section>
+        <h1>Add New Game</h1>
+        <form id="add-game-form">
+            <input type="text" id="title" placeholder="Title" required><br><br>
+            <input type="text" id="genre" placeholder="Genre" required><br><br>
+            <input type="number" step="0.01" id="price" placeholder="Price" required><br><br>
+            <input type="text" id="developer" placeholder="Developer" required><br><br>
+            <input type="url" id="imageUrl" placeholder="Image URL" required><br><br>
+            <textarea id="description" rows="4" placeholder="Description" required></textarea><br><br>
+            <button type="submit">Add Game</button>
+        </form>
+    </section>
+
+    <section>
+        <h1>Manage Games</h1>
+        <div id="game-list">
+            <!-- Games load here -->
+        </div>
+    </section>
+
+    <section>
+        <h1>Manage Reviews</h1>
+        <div id="review-list">
+            <!-- Reviews load here -->
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>© 2025 Game Reviews. All rights reserved.</p>
+</footer>
+
+<script>
+    async function checkAdmin() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const user = await res.json();
+            console.log('Admin Page check:', user.role);
+            if (user.role !== 'ROLE_ADMIN') {
+                alert('Access Denied. Admins only.');
+                window.location.href = 'home.html';
+            }
+        } catch (error) {
+            console.error('Error checking admin role', error);
+            window.location.href = 'home.html';
+        }
+    }
+
+    // Add Game
+    document.getElementById('add-game-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const game = {
+            title: document.getElementById('title').value,
+            genre: document.getElementById('genre').value,
+            price: parseFloat(document.getElementById('price').value),
+            developer: document.getElementById('developer').value,
+            imageUrl: document.getElementById('imageUrl').value,
+            description: document.getElementById('description').value
+        };
+
+        try {
+            const response = await fetch('/api/games', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(game)
+            });
+
+            if (response.ok) {
+                alert('Game added successfully!');
+                document.getElementById('add-game-form').reset();
+                loadGames();
+            } else {
+                alert('Failed to add game.');
+            }
+        } catch (error) {
+            console.error('Error adding game', error);
+        }
+    });
+
+    // Load all Games
+    async function loadGames() {
+        try {
+            const res = await fetch('/api/games');
+            const games = await res.json();
+            const gameList = document.getElementById('game-list');
+            gameList.innerHTML = '';
+
+            games.forEach(game => {
+                const div = document.createElement('div');
+                div.style.marginBottom = "10px";
+                div.innerHTML = `
+                <strong>${game.title}</strong> - ${game.genre} - $${game.price.toFixed(2)}
+                <button onclick="deleteGame('${game.id}')">Delete Game</button>
+            `;
+                gameList.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Failed to load games', error);
+        }
+    }
+
+    // Load all Reviews
+    async function loadReviews() {
+        try {
+            const res = await fetch('/api/reviews');
+            const reviews = await res.json();
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            reviews.forEach(review => {
+                const div = document.createElement('div');
+                div.style.marginBottom = "10px";
+                div.innerHTML = `
+                <strong>${review.username}</strong> - Rating: ${review.rating}/5
+                <p>${review.comment}</p>
+                <button onclick="deleteReview('${review.id}')">Delete Review</button>
+            `;
+                reviewList.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Failed to load reviews', error);
+        }
+    }
+
+    // Delete a Game
+    async function deleteGame(gameId) {
+        if (!confirm('Are you sure you want to delete this game?')) return;
+
+        try {
+            const response = await fetch(`/api/games/${gameId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Game deleted!');
+                loadGames();
+            } else {
+                alert('Failed to delete game.');
+            }
+        } catch (error) {
+            console.error('Error deleting game', error);
+        }
+    }
+
+    // Delete a Review
+    async function deleteReview(reviewId) {
+        if (!confirm('Are you sure you want to delete this review?')) return;
+
+        try {
+            const response = await fetch(`/api/reviews/${reviewId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Review deleted!');
+                loadReviews();
+            } else {
+                alert('Failed to delete review.');
+            }
+        } catch (error) {
+            console.error('Error deleting review', error);
+        }
+    }
+
+    // Initial Load
+    checkAdmin();
+    loadGames();
+    loadReviews();
+</script>
+
+</body>
+</html>
